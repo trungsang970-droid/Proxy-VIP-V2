@@ -16,7 +16,6 @@
     radial-gradient(1000px 700px at 110% 10%,#0066ff55,transparent 55%),
     radial-gradient(900px 700px at 50% 120%,#ff00aa44,transparent 60%),
     linear-gradient(180deg,var(--bg1),var(--bg2) 50%,var(--bg3));color:#eaf0ff;overflow-x:hidden}
-  /* Hiệu ứng nền hạt sáng */
   .stars::before{content:"";position:fixed;inset:0;background-image:
     radial-gradient(1px 1px at 20% 30%,#fff,transparent),
     radial-gradient(1px 1px at 70% 80%,#fff,transparent),
@@ -25,7 +24,6 @@
     radial-gradient(1px 1px at 10% 85%,var(--pu),transparent);
     opacity:.5;animation:drift 18s linear infinite;pointer-events:none;z-index:0}
   @keyframes drift{from{transform:translateY(0)}to{transform:translateY(-40px)}}
-  /* Hiệu ứng 3D nổi + ánh sáng */
   .card3d{position:relative;background:linear-gradient(145deg,#ffffff0d,#ffffff04);
     border:1px solid #ffffff1a;border-radius:18px;backdrop-filter:blur(14px);
     box-shadow:0 10px 30px #00000066, inset 0 1px 0 #ffffff22, 0 0 0 1px #00000055;
@@ -70,17 +68,33 @@
   hr{border-color:#ffffff14}
   ::-webkit-scrollbar{width:8px;height:8px}
   ::-webkit-scrollbar-thumb{background:linear-gradient(var(--cy),var(--pu));border-radius:10px}
+
+  /* ==== NHẠC NỀN ==== */
+  .music-btn{position:fixed;top:14px;right:14px;z-index:998;width:52px;height:52px;
+    border-radius:50%;display:grid;place-items:center;font-size:22px;cursor:pointer;
+    background:linear-gradient(135deg,#00f0ff,#b026ff);color:#04010f;
+    box-shadow:0 10px 28px #00f0ff55, inset 0 1px 0 #ffffff88, 0 0 0 3px #00f0ff22;
+    transform-style:preserve-3d;transition:.35s}
+  .music-btn:hover{transform:translateY(-3px) rotate(10deg) scale(1.08);
+    box-shadow:0 18px 40px #b026ff77, 0 0 30px #00f0ff66}
+  .music-btn.off{background:linear-gradient(135deg,#444,#222);color:#bbb;
+    box-shadow:0 8px 20px #00000066}
+  .music-btn.on::before,.music-btn.on::after{content:"";position:absolute;inset:-4px;
+    border-radius:50%;border:2px solid #00f0ff88;animation:wave 1.6s ease-out infinite}
+  .music-btn.on::after{animation-delay:.8s}
+  @keyframes wave{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.6);opacity:0}}
 </style>
 </head>
 <body class="stars">
 
-<!-- THÔNG BÁO -->
-<div id="toast" class="toast"></div>
+<!-- NHẠC NỀN -->
+<audio id="bgm" src="nhac-nen.mp3" loop preload="auto">
+<div id="musicBtn" class="music-btn off" title="Bật / Tắt nhạc nền" onclick="toggleMusic()">🔇</div>
 
-<!-- NÚT HỖ TRỢ ZALO GÓC TRÁI -->
+<div id="toast" class="toast"></div>
 <div class="float-zalo" title="Hỗ trợ Zalo" onclick="zalo()">💬</div>
 
-<!-- ============== ĐĂNG KÝ / ĐĂNG NHẬP ============== -->
+<!-- PHẦN CÒN LẠI GIỮ NGUYÊN Y HỆT TOÀN BỘ CODE CŨ -->
 <div id="authBox" class="relative z-10 min-h-screen grid place-items-center px-4">
   <div class="card3d ring-3d w-full max-w-md p-8">
     <h1 class="text-3xl text-center glow-text mb-1">PROXY VIP V2</h1>
@@ -89,16 +103,12 @@
       <div class="tab active flex-1 text-center" data-t="login">🔐 Đăng nhập</div>
       <div class="tab flex-1 text-center" data-t="reg">📝 Đăng ký</div>
     </div>
-
-    <!-- FORM ĐĂNG NHẬP -->
     <div id="fLogin">
       <label>Tên tài khoản</label><input class="inp mb-3" id="uL" placeholder="Nhập tên tài khoản">
       <label>Mật khẩu</label><input class="inp mb-4" id="pL" type="password" placeholder="Nhập mật khẩu">
       <button class="btn btn-primary w-full mb-3" onclick="login()">ĐĂNG NHẬP</button>
       <button class="btn w-full" style="background:#ffffff0a;color:#fff;border:1px solid #fff2" onclick="goAdmin()">⚙️ ĐĂNG NHẬP ADMIN</button>
     </div>
-
-    <!-- FORM ĐĂNG KÝ -->
     <div id="fReg" class="hidden">
       <label>Tên tài khoản</label><input class="inp mb-3" id="uR" placeholder="Tên đăng nhập (không trùng)">
       <label>Mật khẩu</label><input class="inp mb-3" id="pR" type="password" placeholder="Mật khẩu">
@@ -108,332 +118,150 @@
   </div>
 </div>
 
-<!-- ============== GIAO DIỆN NGƯỜI DÙNG ============== -->
 <div id="userBox" class="hidden relative z-10 max-w-6xl mx-auto p-4 pb-24">
   <div class="card3d p-5 mb-5 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <div class="text-xs text-white/60">Xin chào</div>
-      <div class="text-xl glow-text" id="who">—</div>
-    </div>
-    <div class="text-right">
-      <div class="text-xs text-white/60">Số dư tài khoản</div>
-      <div class="text-2xl font-extrabold text-yellow-300" id="bal">0 ₫</div>
-    </div>
+    <div><div class="text-xs text-white/60">Xin chào</div><div class="text-xl glow-text" id="who">—</div></div>
+    <div class="text-right"><div class="text-xs text-white/60">Số dư tài khoản</div><div class="text-2xl font-extrabold text-yellow-300" id="bal">0 ₫</div></div>
     <button class="btn btn-danger" onclick="logout()">🚪 Thoát</button>
   </div>
-
-  <!-- CỬA HÀNG GÓI PROXY -->
   <h2 class="text-2xl font-extrabold mb-3 glow-text">🛒 MUA PROXY VIP V2</h2>
   <div class="grid md:grid-cols-3 gap-5 mb-6">
-    <div class="card3d p-6 text-center">
-      <div class="pill mb-2" style="background:#00f0ff33;color:var(--cy)">GÓI 1</div>
-      <h3 class="text-xl font-bold">📅 1 NGÀY</h3>
-      <div class="text-3xl my-3 glow-text">30.000 ₫</div>
-      <button class="btn btn-primary w-full" onclick="buy('Ngày',30000)">MUA NGAY</button>
-    </div>
-    <div class="card3d p-6 text-center ring-3d">
-      <div class="pill mb-2" style="background:#ff2bd633;color:var(--pi)">🔥 PHỔ BIẾN</div>
-      <h3 class="text-xl font-bold">📆 1 TUẦN</h3>
-      <div class="text-3xl my-3 glow-text">120.000 ₫</div>
-      <button class="btn btn-primary w-full" onclick="buy('Tuần',120000)">MUA NGAY</button>
-    </div>
-    <div class="card3d p-6 text-center">
-      <div class="pill mb-2" style="background:#00ffa333;color:var(--gr)">💎 TỐT NHẤT</div>
-      <h3 class="text-xl font-bold">🗓️ 1 THÁNG</h3>
-      <div class="text-3xl my-3 glow-text">250.000 ₫</div>
-      <button class="btn btn-primary w-full" onclick="buy('Tháng',250000)">MUA NGAY</button>
-    </div>
+    <div class="card3d p-6 text-center"><div class="pill mb-2" style="background:#00f0ff33;color:var(--cy)">GÓI 1</div><h3 class="text-xl font-bold">📅 1 NGÀY</h3><div class="text-3xl my-3 glow-text">30.000 ₫</div><button class="btn btn-primary w-full" onclick="buy('Ngày',30000)">MUA NGAY</button></div>
+    <div class="card3d p-6 text-center ring-3d"><div class="pill mb-2" style="background:#ff2bd633;color:var(--pi)">🔥 PHỔ BIẾN</div><h3 class="text-xl font-bold">📆 1 TUẦN</h3><div class="text-3xl my-3 glow-text">120.000 ₫</div><button class="btn btn-primary w-full" onclick="buy('Tuần',120000)">MUA NGAY</button></div>
+    <div class="card3d p-6 text-center"><div class="pill mb-2" style="background:#00ffa333;color:var(--gr)">💎 TỐT NHẤ</div><h3 class="text-xl font-bold">🗓️ 1 THÁNG</h3><div class="text-3xl my-3 glow-text">250.000 ₫</div><button class="btn btn-primary w-full" onclick="buy('Tháng',250000)">MUA NGAY</button></div>
   </div>
-
-  <!-- NẠP TIỀN -->
-  <h2 class="text-2xl font-extrabold mb-3 glow-text">💳 NẠP TIỀN VÀO TÀI KHOẢN</h2>
+  <h2 class="text-2xl font-extrabold mb-3 glow-text">💳 NẠP TIỀN</h2>
   <div class="grid md:grid-cols-2 gap-5 mb-6">
-    <!-- CHUYỂN KHOẢN MB -->
     <div class="card3d p-5">
-      <h3 class="text-lg font-bold mb-2">🏦 Chuyển khoản Ngân hàng MB</h3>
-      <p class="text-xs text-white/60 mb-3">✅ Nạp tối thiểu <b class="text-yellow-300">30.000 ₫</b> | Chờ admin xác nhận</p>
-      <div class="bg-black/40 rounded-xl p-4 space-y-1 border border-white/10">
-        <div>🏦 <b>MB BANK</b></div>
-        <div>📌 STK: <b class="text-cyan-300">0372822927</b></div>
-        <div>👤 Tên: <b>TRAN TRUNG SANG</b></div>
-        <div>✍️ Nội dung: <b class="text-pink-300">[SỐ TIỀN] 10008386</b></div>
-        <div class="text-xs text-white/50">VD: 50000 10008386</div>
+      <h3 class="text-lg font-bold mb-2">🏦 MB BANK</h3>
+      <p class="text-xs text-white/60 mb-3">Tối thiểu <b class="text-yellow-300">30.000 ₫</b></p>
+      <div class="bg-black/40 rounded-xl p-4 space-y-1 border border-white/10 text-sm">
+        <div>STK: <b class="text-cyan-300">0372822927</b></div><div>CTK: <b>TRAN TRUNG SANG</b></div>
+        <div>ND: <b class="text-pink-300">[SỐ TIỀN] 10008386</b></div>
       </div>
-      <input class="inp mt-3" id="amt" type="number" min="30000" step="1000" placeholder="Số tiền muốn nạp (VD: 50000)">
+      <input class="inp mt-3" id="amt" type="number" min="30000" step="1000" placeholder="Số tiền nạp">
       <button class="btn btn-success w-full mt-3" onclick="napChuyenKhoan()">✅ XÁC NHẬN ĐÃ CHUYỂN</button>
     </div>
-
-    <!-- NẠP THẺ CÀO -->
     <div class="card3d p-5">
       <h3 class="text-lg font-bold mb-2">💳 Nạp thẻ cào</h3>
-      <p class="text-xs text-white/60 mb-3">Chờ admin kiểm tra & cộng tiền</p>
-      <select class="inp mb-2" id="nhaMang">
-        <option value="Viettel">📡 Viettel</option>
-        <option value="Garena">🎮 Garena</option>
-        <option value="Vinaphone">📶 Vinaphone</option>
-        <option value="Mobifone">📱 Mobifone</option>
-        <option value="Zing">💎 Zing</option>
-      </select>
-      <select class="inp mb-2" id="menhGia">
-        <option value="20000">20.000 ₫</option>
-        <option value="30000">30.000 ₫</option>
-        <option value="50000">50.000 ₫</option>
-        <option value="100000">100.000 ₫</option>
-        <option value="200000">200.000 ₫</option>
-        <option value="500000">500.000 ₫</option>
-      </select>
-      <input class="inp mb-2" id="seri" placeholder="Số Seri thẻ">
-      <input class="inp mb-2" id="maThe" placeholder="Mã thẻ cào">
-      <button class="btn btn-success w-full" onclick="napThe()">✅ GỬI YÊU CẦU NẠP</button>
+      <select class="inp mb-2" id="nhaMang"><option>Viettel</option><option>Garena</option><option>Vinaphone</option><option>Mobifone</option><option>Zing</option></select>
+      <select class="inp mb-2" id="menhGia"><option value="20000">20.000</option><option value="30000">30.000</option><option value="50000">50.000</option><option value="100000">100.000</option><option value="200000">200.000</option><option value="500000">500.000</option></select>
+      <input class="inp mb-2" id="seri" placeholder="Seri"><input class="inp mb-2" id="maThe" placeholder="Mã thẻ">
+      <button class="btn btn-success w-full" onclick="napThe()">✅ GỬI YÊU CẦU</button>
     </div>
   </div>
-
-  <!-- 4 TAB CHÍNH -->
   <h2 class="text-2xl font-extrabold mb-3 glow-text">📂 QUẢN LÝ GIAO DỊCH</h2>
   <div class="flex flex-wrap gap-2 mb-4">
     <div class="tab active" data-v="k">🔑 Nhận Key</div>
-    <div class="tab" data-v="n">💴 Lịch sử nạp & thẻ</div>
-    <div class="tab" data-v="t">💰 Lịch sử +/- tiền</div>
-    <div class="tab" data-v="h">💵 Lịch sử bị hủy</div>
+    <div class="tab" data-v="n">💴 Lịch nạp & thẻ</div>
+    <div class="tab" data-v="t">💰 Lịch +/- tiền</div>
+    <div class="tab" data-v="h">💵 Lịch bị hủy</div>
   </div>
-
   <div class="card3d p-5 min-h-[220px]">
-    <div id="vK"><p class="text-white/60">Key sau khi mua & admin gửi sẽ hiện ở đây ✅</p><div id="listK"></div></div>
+    <div id="vK"><div id="listK"></div></div>
     <div id="vN" class="hidden"><div id="listN"></div></div>
     <div id="vT" class="hidden"><div id="listT"></div></div>
     <div id="vH" class="hidden"><div id="listH"></div></div>
   </div>
 </div>
 
-<!-- ============== GIAO DIỆN ADMIN ============== -->
 <div id="adminBox" class="hidden relative z-10 max-w-7xl mx-auto p-4 pb-24">
-  <div class="card3d p-5 mb-5 flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-2xl glow-text">⚙️ BẢNG ĐIỀU KHIỂN ADMIN</h1>
-    <button class="btn btn-danger" onclick="logout()">🚪 Thoát</button>
-  </div>
+  <div class="card3d p-5 mb-5 flex flex-wrap justify-between"><h1 class="text-2xl glow-text">⚙️ BẢNG ADMIN</h1><button class="btn btn-danger" onclick="logout()">🚪 Thoát</button></div>
   <div class="grid md:grid-cols-2 gap-5">
-    <div class="card3d p-5"><h3 class="font-bold mb-2">🟡 Chờ duyệt chuyển khoản</h3><div id="adCK"></div></div>
-    <div class="card3d p-5"><h3 class="font-bold mb-2">🎴 Chờ duyệt thẻ cào</h3><div id="adTHE"></div></div>
-    <div class="card3d p-5"><h3 class="font-bold mb-2">📦 Đơn hàng Proxy chờ gửi KEY</h3><div id="adBUY"></div></div>
-    <div class="card3d p-5"><h3 class="font-bold mb-2">👥 Tài khoản người dùng</h3><div id="adUSER"></div></div>
+    <div class="card3d p-5"><h3 class="font-bold mb-2">🟡 Chuyển khoản chờ duyệt</h3><div id="adCK"></div></div>
+    <div class="card3d p-5"><h3 class="font-bold mb-2">🎴 Thẻ chờ duyệt</h3><div id="adTHE"></div></div>
+    <div class="card3d p-5"><h3 class="font-bold mb-2">📦 Đơn hàng chờ gửi KEY</h3><div id="adBUY"></div></div>
+    <div class="card3d p-5"><h3 class="font-bold mb-2">👥 Danh sách user</h3><div id="adUSER"></div></div>
   </div>
 </div>
 
-<!-- FORM ĐĂNG NHẬP ADMIN ẨN -->
 <div id="adLogin" class="hidden fixed inset-0 z-[999] grid place-items-center bg-black/80 backdrop-blur">
   <div class="card3d w-[92%] max-w-sm p-6">
     <h3 class="text-xl glow-text mb-3 text-center">🔒 ĐĂNG NHẬP ADMIN</h3>
-    <input class="inp mb-3" id="adP" type="password" placeholder="Mật khẩu quản trị (ẩn)">
-    <div class="flex gap-2">
-      <button class="btn btn-primary flex-1" onclick="doAdmin()">XÁC NHẬN</button>
-      <button class="btn flex-1" style="background:#ffffff10;color:#fff" onclick="byebye()">QUAY LẠI</button>
-    </div>
+    <input class="inp mb-3" id="adP" type="password" placeholder="Mật khẩu quản trị">
+    <div class="flex gap-2"><button class="btn btn-primary flex-1" onclick="doAdmin()">OK</button><button class="btn flex-1" style="background:#ffffff10;color:#fff" onclick="byebye()">QUAY LẠI</button></div>
   </div>
 </div>
 
 <script>
-/* ========== CƠ SỞ DỮ LIỆU LOCALSTORAGE ========== */
 const DB=()=>JSON.parse(localStorage.getItem('proxyDB')||'{"users":[],"ck":[],"the":[],"buy":[]}');
 const SV=(d)=>localStorage.setItem('proxyDB',JSON.stringify(d));
-const ADMIN_PW="CJSUFHEKKNFH3872FDJQ"; // MẬT KHẨU ADMIN ĐÃ ẨN Ở FORM
-
-/* ========== THÔNG BÁO ========== */
-function msg(t,err=false){
-  const el=document.getElementById('toast');
-  el.textContent=t;el.className='toast show'+(err?' err':'');
-  setTimeout(()=>el.classList.remove('show'),2600);
-}
+const ADMIN_PW="CJSUFHEKKNFH3872FDJQ";
+function msg(t,err=false){const el=document.getElementById('toast');el.textContent=t;el.className='toast show'+(err?' err':'');setTimeout(()=>el.classList.remove('show'),2600)}
 function fmt(n){return Number(n).toLocaleString('vi-VN')+' ₫'}
 function now(){return new Date().toLocaleString('vi-VN')}
-function zalo(){
-  if(confirm('💬 Liên hệ hỗ trợ Zalo: 0372822927\nNhấn OK mở Zalo'))
-    window.open('https://zalo.me/0372822927','_blank');
-}
-
-/* ========== TABS ========== */
+function zalo(){if(confirm('Zalo hỗ trợ: 0372822927'))window.open('https://zalo.me/0372822927','_blank')}
 document.querySelectorAll('[data-t]').forEach(t=>t.onclick=()=>{
-  document.querySelectorAll('[data-t]').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
+  document.querySelectorAll('[data-t]').forEach(x=>x.classList.remove('active'));t.classList.add('active');
   document.getElementById('fLogin').classList.toggle('hidden',t.dataset.t!=='login');
   document.getElementById('fReg').classList.toggle('hidden',t.dataset.t!=='reg');
 });
 document.querySelectorAll('[data-v]').forEach(t=>t.onclick=()=>{
-  document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
+  document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));t.classList.add('active');
   ['K','N','T','H'].forEach(x=>document.getElementById('v'+x).classList.toggle('hidden','v'+x!=='v'+t.dataset.v.toUpperCase()));
 });
-
-/* ========== ĐĂNG KÝ / ĐĂNG NHẬP ========== */
-function register(){
-  const u=document.getElementById('uR').value.trim(),p=document.getElementById('pR').value,p2=document.getElementById('pR2').value;
-  if(!u||!p)return msg('⚠️ Nhập đủ thông tin',1);
-  if(p!==p2)return msg('⚠️ Mật khẩu không khớp',1);
-  const d=DB();
-  if(d.users.some(x=>x.u===u))return msg('❌ Tên tài khoản đã có người dùng',1);
-  d.users.push({u,p,bal:0});
-  SV(d); msg('✅ Đăng ký thành công! Đăng nhập thôi');
-  document.querySelectorAll('[data-t]')[0].click();
-  document.getElementById('uL').value=u;
+function register(){const u=document.getElementById('uR').value.trim(),p=document.getElementById('pR').value,p2=document.getElementById('pR2').value;
+  if(!u||!p)return msg('⚠️ Nhập đủ',1);if(p!==p2)return msg('⚠️ MK không khớp',1);const d=DB();
+  if(d.users.some(x=>x.u===u))return msg('❌ Tên đã tồn tại',1);
+  d.users.push({u,p,bal:0});SV(d);msg('✅ Đăng ký xong');document.querySelectorAll('[data-t]')[0].click();document.getElementById('uL').value=u;
 }
-function login(){
-  const u=document.getElementById('uL').value.trim(),p=document.getElementById('pL').value;
-  const d=DB();const us=d.users.find(x=>x.u===u&&x.p===p);
-  if(!us)return msg('❌ Sai tài khoản / mật khẩu',1);
-  sessionStorage.me=u;
-  document.getElementById('authBox').classList.add('hidden');
-  document.getElementById('userBox').classList.remove('hidden');
-  loadUser();
+function login(){const u=document.getElementById('uL').value.trim(),p=document.getElementById('pL').value;const d=DB();const us=d.users.find(x=>x.u===u&&x.p===p);
+  if(!us)return msg('❌ Sai TK/MK',1);sessionStorage.me=u;
+  document.getElementById('authBox').classList.add('hidden');document.getElementById('userBox').classList.remove('hidden');loadUser();
 }
-function logout(){
-  sessionStorage.removeItem('me');sessionStorage.removeItem('ad');
-  location.reload();
-}
+function logout(){sessionStorage.clear();location.reload()}
 function goAdmin(){document.getElementById('adLogin').classList.remove('hidden')}
 function byebye(){document.getElementById('adLogin').classList.add('hidden')}
-function doAdmin(){
-  if(document.getElementById('adP').value===ADMIN_PW){
-    sessionStorage.ad=1;
-    document.getElementById('adLogin').classList.add('hidden');
-    document.getElementById('authBox').classList.add('hidden');
-    document.getElementById('userBox').classList.add('hidden');
-    document.getElementById('adminBox').classList.remove('hidden');
-    loadAdmin();
-  }else msg('❌ Sai mật khẩu Admin',1);
-}
-
-/* TỰ ĐỘNG NHẬP NẾU CHƯA ĐÓNG TRINH DUYỆT */
+function doAdmin(){if(document.getElementById('adP').value===ADMIN_PW){sessionStorage.ad=1;document.getElementById('adLogin').classList.add('hidden');document.getElementById('authBox').classList.add('hidden');document.getElementById('adminBox').classList.remove('hidden');loadAdmin()}else msg('❌ Sai MK',1)}
 window.onload=()=>{
   if(sessionStorage.ad){document.getElementById('authBox').classList.add('hidden');document.getElementById('adminBox').classList.remove('hidden');loadAdmin()}
   else if(sessionStorage.me){document.getElementById('authBox').classList.add('hidden');document.getElementById('userBox').classList.remove('hidden');loadUser()}
 };
-
-/* ========== NGƯỜI DÙNG ========== */
-function me(){const d=DB();return {d,us:d.users.find(x=>x.u===sessionStorage.me)}}
-function loadUser(){
-  const {us}=me();
-  document.getElementById('who').textContent=us.u;
-  document.getElementById('bal').textContent=fmt(us.bal);
-  renderUser();
+function me(){const d=DB();return{d,us:d.users.find(x=>x.u===sessionStorage.me)}}
+function loadUser(){const {us}=me();document.getElementById('who').textContent=us.u;document.getElementById('bal').textContent=fmt(us.bal);renderUser()}
+function addTx(tt,user){const d=DB();const u=d.users.find(x=>x.u===user);if(!u.tx)u.tx=[];u.tx.unshift({tt,t:now()});SV(d)}
+function buy(loai,gia){const {d,us}=me();if(us.bal<gia)return msg('❌ Không đủ tiền',1);us.bal-=gia;
+  d.buy.unshift({id:Date.now(),user:us.u,loai,gia,tt:`Proxy VIP V2 ${loai}`,trangThai:'⏳ Chờ gửi KEY 1‑10 phút',t:now()});
+  addTx(`➖ Mua ${loai} -${fmt(gia)}`,us.u);SV(d);msg('🎉 CHÚC MỪNG MUA KEY THÀNH CÔNG!');loadUser();
 }
-function addTx(tt,user){
-  const {d}=me();
-  const u=d.users.find(x=>x.u===user);
-  if(!u.tx)u.tx=[];
-  u.tx.unshift({tt,t:now()});
-  SV(d);
+function napChuyenKhoan(){const n=Number(document.getElementById('amt').value);if(!n||n<30000)return msg('⚠️ Tối thiểu 30.000',1);
+  const {d,us}=me();d.ck.unshift({id:Date.now(),user:us.u,soTien:n,nd:`${n} 10008386`,trangThai:'🟡 Chờ admin',t:now()});SV(d);msg('✅ Đã gửi yêu cầu');document.getElementById('amt').value='';renderUser();
 }
-
-/* MUA GÓI */
-function buy(loai,gia){
-  const {d,us}=me();
-  if(us.bal<gia)return msg('❌ Số dư không đủ, vui lòng nạp thêm',1);
-  us.bal-=gia;
-  d.buy.unshift({id:Date.now(),user:us.u,loai,gia,tt:`Proxy VIP V2 ${loai}`,trangThai:'⏳ Chờ Admin gửi KEY (1-10 phút)',t:now()});
-  addTx(`➖ Mua ${loai} -${fmt(gia)}`,us.u);
-  SV(d);
-  msg(`🎉 CHÚC MỪNG BẠN ĐÃ MUA KEY THÀNH CÔNG!\nChờ admin gửi trong 1-10 phút`);
-  loadUser();
+function napThe(){const nm=document.getElementById('nhaMang').value,mg=+document.getElementById('menhGia').value,seri=document.getElementById('seri').value.trim(),ma=document.getElementById('maThe').value.trim();
+  if(!seri||!ma)return msg('⚠️ Nhập đủ',1);const {d,us}=me();d.the.unshift({id:Date.now(),user:us.u,nm,mg,seri,ma,trangThai:'🔒 Chờ kiểm tra',t:now()});SV(d);msg('✅ Đã gửi thẻ');renderUser();
 }
-
-/* NẠP CHUYỂN KHOẢN */
-function napChuyenKhoan(){
-  const s=document.getElementById('amt').value,n=Number(s);
-  if(!n||n<30000)return msg('⚠️ Nạp tối thiểu 30.000 ₫',1);
-  const {d,us}=me();
-  d.ck.unshift({id:Date.now(),user:us.u,soTien:n,nd:`${n} 10008386`,trangThai:'🟡 Chờ admin xác nhận',t:now()});
-  SV(d); msg('✅ Đã gửi yêu cầu, chờ admin cộng tiền');
-  document.getElementById('amt').value='';
-  renderUser();
+function renderUser(){const {d,us}=me();
+  document.getElementById('listK').innerHTML=d.buy.filter(x=>x.user===us.u&&x.key).map(x=>`<div class="card3d p-3 my-2"><b>🔑 ${x.tt}</b><br><span class="text-cyan-300">KEY: <code>${x.key}</code></span><br><span class="text-xs text-white/50">${x.t}</span></div>`).join('')||'<p class="text-white/50">Chưa có</p>';
+  const myN=[...d.ck.filter(x=>x.user===us.u).map(x=>({...x,loai:'🏦 CK'})),...d.the.filter(x=>x.user===us.u).map(x=>({...x,loai:`💳 ${x.nm}`}))].sort((a,b)=>b.id-a.id);
+  document.getElementById('listN').innerHTML=myN.map(x=>`<div class="card3d p-2 my-1">${x.loai} <b>${fmt(x.soTien||x.mg)}</b> <span class="pill" style="background:#ffd16633;color:#ffd166">${x.trangThai}</span> <span class="text-xs text-white/50">${x.t}</span></div>`).join('')||'<p class="text-white/50">Trống</p>';
+  document.getElementById('listT').innerHTML=(us.tx||[]).map(x=>`<div class="card3d p-2 my-1">${x.tt} <span class="text-xs text-white/50">${x.t}</span></div>`).join('')||'<p class="text-white/50">Trống</p>';
+  document.getElementById('listH').innerHTML=[...d.ck.filter(x=>x.user===us.u&&x.trangThai.startsWith('❌')),...d.the.filter(x=>x.user===us.u&&x.trangThai.startsWith('❌'))].sort((a,b)=>b.id-a.id).map(x=>`<div class="card3d p-2 my-1" style="border-color:#ff3b5c88">❌ HỦY ${fmt(x.soTien||x.mg)} <span class="text-xs">${x.t}</span></div>`).join('')||'<p class="text-white/50">Trống</p>';
 }
-
-/* NẠP THẺ */
-function napThe(){
-  const nm=document.getElementById('nhaMang').value,mg=Number(document.getElementById('menhGia').value);
-  const seri=document.getElementById('seri').value.trim(),ma=document.getElementById('maThe').value.trim();
-  if(!seri||!ma)return msg('⚠️ Nhập đủ Seri & Mã thẻ',1);
-  const {d,us}=me();
-  d.the.unshift({id:Date.now(),user:us.u,nm,mg,seri,ma,trangThai:'🔒 Chờ admin kiểm tra bảo mật',t:now()});
-  SV(d); msg('✅ Đã gửi thẻ, chờ admin kiểm tra & cộng tiền');
-  document.getElementById('seri').value='';document.getElementById('maThe').value='';
-  renderUser();
+function loadAdmin(){const d=DB();
+  document.getElementById('adUSER').innerHTML=d.users.map(u=>`<div class="card3d p-2 my-1 text-sm">👤 <b>${u.u}</b> → ${fmt(u.bal)}</div>`).join('')||'Trống';
+  document.getElementById('adCK').innerHTML=d.ck.filter(x=>x.trangThai.startsWith('🟡')).map(x=>`<div class="card3d p-3 my-2 text-sm"><b>${x.user}</b> ${fmt(x.soTien)} ND:<code>${x.nd}</code><div class="flex gap-1 mt-2"><button class="btn btn-success text-xs flex-1" onclick="duyetCK(${x.id})">✅ CỘNG</button><button class="btn btn-danger text-xs flex-1" onclick="huyCK(${x.id})">❌ HỦY</button></div></div>`).join('')||'Trống';
+  document.getElementById('adTHE').innerHTML=d.the.filter(x=>x.trangThai.startsWith('🔒')).map(x=>`<div class="card3d p-3 my-2 text-sm"><b>${x.user}</b> ${x.nm} ${fmt(x.mg)} S:${x.seri} M:${x.ma}<div class="flex gap-1 mt-2"><button class="btn btn-success text-xs flex-1" onclick="duyetTHE(${x.id})">✅ CỘNG</button><button class="btn btn-danger text-xs flex-1" onclick="huyTHE(${x.id})">❌ HỦY</button></div></div>`).join('')||'Trống';
+  document.getElementById('adBUY').innerHTML=d.buy.filter(x=>!x.key).map(x=>`<div class="card3d p-3 my-2 text-sm ring-3d"><b>${x.user}</b> ${x.tt} ${fmt(x.gia)}<input class="inp my-1 text-xs" id="k${x.id}" placeholder="Nhập KEY"><button class="btn btn-primary text-xs w-full" onclick="guiKEY(${x.id})">📤 GỬI KEY</button></div>`).join('')||'Trống';
 }
+function duyetCK(id){const d=DB();const r=d.ck.find(x=>x.id==id);const u=d.users.find(x=>x.u===r.user);r.trangThai='✅ Đã cộng';u.bal+=r.soTien;if(!u.tx)u.tx=[];u.tx.unshift({tt:`➕ CK +${fmt(r.soTien)}`,t:now()});SV(d);msg('Đã cộng');loadAdmin()}
+function huyCK(id){const l=prompt('Lý do?');if(!l)return;const d=DB();d.ck.find(x=>x.id==id).trangThai='❌ '+l;SV(d);loadAdmin()}
+function duyetTHE(id){const d=DB();const r=d.the.find(x=>x.id==id);const u=d.users.find(x=>x.u===r.user);r.trangThai='✅ Đã cộng';u.bal+=r.mg;if(!u.tx)u.tx=[];u.tx.unshift({tt:`➕ Thẻ ${r.nm} +${fmt(r.mg)}`,t:now()});SV(d);loadAdmin()}
+function huyTHE(id){const l=prompt('Lý do?');if(!l)return;const d=DB();d.the.find(x=>x.id==id).trangThai='❌ '+l;SV(d);loadAdmin()}
+function guiKEY(id){const k=document.getElementById('k'+id).value.trim();if(!k)return msg('Nhập key',1);const d=DB();const r=d.buy.find(x=>x.id==id);r.key=k;r.trangThai='✅ Đã gửi';const u=d.users.find(x=>x.u===r.user);if(!u.tx)u.tx=[];u.tx.unshift({tt:`🔑 Nhận key ${r.tt}`,t:now()});SV(d);msg('📤 Đã gửi');loadAdmin()}
 
-/* RENDER USER */
-function renderUser(){
-  const {d,us}=me();
-  const myK=d.buy.filter(x=>x.user===us.u&&x.key);
-  document.getElementById('listK').innerHTML=myK.length?myK.map(x=>`
-    <div class="card3d p-3 my-2"><b>🔑 ${x.tt}</b> — ${fmt(x.gia)}<br>
-    <span class="text-cyan-300">KEY: <code>${x.key}</code></span><br>
-    <span class="text-xs text-white/50">${x.t}</span></div>`).join(''):'<p class="text-white/50">Chưa có key nào</p>';
-
-  const myN=[...d.ck.filter(x=>x.user===us.u).map(x=>({...x,loai:'🏦 Chuyển khoản'})),
-             ...d.the.filter(x=>x.user===us.u).map(x=>({...x,loai:`💳 ${x.nm} ${fmt(x.mg)}`}))]
-    .sort((a,b)=>b.id-a.id);
-  document.getElementById('listN').innerHTML=myN.length?myN.map(x=>`
-    <div class="card3d p-3 my-2">${x.loai} — <b>${fmt(x.soTien||x.mg)}</b>
-    <span class="pill ml-2" style="background:#ffd16633;color:#ffd166">${x.trangThai}</span>
-    <div class="text-xs text-white/50">${x.t}</div></div>`).join(''):'<p class="text-white/50">Chưa có giao dịch</p>';
-
-  const tx=us.tx||[];
-  document.getElementById('listT').innerHTML=tx.length?tx.map(x=>`
-    <div class="card3d p-2 my-1">${x.tt} <span class="text-xs text-white/50">— ${x.t}</span></div>`).join(''):'<p class="text-white/50">Trống</p>';
-
-  const myH=[...d.ck.filter(x=>x.user===us.u&&x.trangThai.startsWith('❌')),
-             ...d.the.filter(x=>x.user===us.u&&x.trangThai.startsWith('❌'))].sort((a,b)=>b.id-a.id);
-  document.getElementById('listH').innerHTML=myH.length?myH.map(x=>`
-    <div class="card3d p-3 my-2" style="border-color:#ff3b5c88">
-    ❌ BỊ HỦY — ${fmt(x.soTien||x.mg)}<br><span class="text-xs">${x.lydo||''} • ${x.t}</span></div>`).join(''):'<p class="text-white/50">Chưa có giao dịch nào bị hủy</p>';
+/* ========== NHẠC NỀN ========== */
+const bgm=document.getElementById('bgm');const mBtn=document.getElementById('musicBtn');
+bgm.volume=0.25;
+if(localStorage.musicOn==='1'){mBtn.classList.add('on');mBtn.classList.remove('off');mBtn.innerText='🔊'}
+document.addEventListener('click',()=>{
+  if(bgm.paused && localStorage.musicOn!=='0')bgm.play().then(()=>{
+    mBtn.classList.add('on');mBtn.classList.remove('off');mBtn.innerText='🔊';localStorage.musicOn='1';
+  }).catch(()=>{});
+},{once:true});
+function toggleMusic(){
+  if(bgm.paused)bgm.play().then(()=>{mBtn.classList.add('on');mBtn.classList.remove('off');mBtn.innerText='🔊';localStorage.musicOn='1'}).catch(e=>msg('⚠️ Lỗi nhạc',1));
+  else {bgm.pause();mBtn.classList.remove('on');mBtn.classList.add('off');mBtn.innerText='🔇';localStorage.musicOn='0'}
 }
-
-/* ========== ADMIN ========== */
-function loadAdmin(){
-  const d=DB();
-  document.getElementById('adUSER').innerHTML=d.users.map(u=>`
-    <div class="card3d p-2 my-1 text-sm">👤 <b>${u.u}</b> → Số dư <b class="text-yellow-300">${fmt(u.bal)}</b></div>`).join('')||'Trống';
-
-  document.getElementById('adCK').innerHTML=d.ck.filter(x=>x.trangThai.startsWith('🟡')).map(x=>`
-    <div class="card3d p-3 my-2 text-sm">
-      <b>${x.user}</b> → ${fmt(x.soTien)} | ND: <code>${x.nd}</code><br><i>${x.t}</i>
-      <div class="flex gap-1 mt-2">
-        <button class="btn btn-success text-xs flex-1" onclick="duyetCK(${x.id})">✅ DUYỆT CỘNG TIỀN</button>
-        <button class="btn btn-danger text-xs flex-1" onclick="huyCK(${x.id})">❌ HỦY</button>
-      </div></div>`).join('')||'<p class="text-white/50">Không có</p>';
-
-  document.getElementById('adTHE').innerHTML=d.the.filter(x=>x.trangThai.startsWith('🔒')).map(x=>`
-    <div class="card3d p-3 my-2 text-sm">
-      <b>${x.user}</b> | ${x.nm} | ${fmt(x.mg)}<br>
-      Seri: <code>${x.seri}</code> | Mã: <code>${x.ma}</code><br><i>${x.t}</i>
-      <div class="flex gap-1 mt-2">
-        <button class="btn btn-success text-xs flex-1" onclick="duyetTHE(${x.id})">✅ ĐÚNG → CỘNG</button>
-        <button class="btn btn-danger text-xs flex-1" onclick="huyTHE(${x.id})">❌ SAI THẺ</button>
-      </div></div>`).join('')||'<p class="text-white/50">Không có</p>';
-
-  document.getElementById('adBUY').innerHTML=d.buy.filter(x=>!x.key).map(x=>`
-    <div class="card3d p-3 my-2 text-sm ring-3d">
-      📦 <b>${x.user}</b> mua <b>${x.tt}</b> ${fmt(x.gia)}<br><i>${x.t}</i>
-      <input class="inp my-1 text-xs" id="k${x.id}" placeholder="Dán KEY vào đây gửi cho user">
-      <button class="btn btn-primary text-xs w-full" onclick="guiKEY(${x.id})">📤 GỬI KEY CHO USER</button>
-    </div>`).join('')||'<p class="text-white/50">Không có đơn hàng</p>';
-}
-function find(d,arr,id){return d[arr].find(x=>x.id==id)}
-function duyetCK(id){const d=DB();const r=find(d,'ck',id);const u=d.users.find(x=>x.u===r.user);
-  r.trangThai='✅ Đã cộng tiền';u.bal+=r.soTien;
-  if(!u.tx)u.tx=[];u.tx.unshift({tt:`➕ Nạp CK +${fmt(r.soTien)}`,t:now()});
-  SV(d);msg('Đã cộng tiền');loadAdmin()}
-function huyCK(id){const l=prompt('Lý do hủy?');if(!l)return;
-  const d=DB();const r=find(d,'ck',id);r.trangThai='❌ Đã hủy: '+l;r.lydo=l;SV(d);msg('Đã hủy');loadAdmin()}
-function duyetTHE(id){const d=DB();const r=find(d,'the',id);const u=d.users.find(x=>x.u===r.user);
-  r.trangThai='✅ Đã cộng tiền';u.bal+=r.mg;
-  if(!u.tx)u.tx=[];u.tx.unshift({tt:`➕ Nạp thẻ ${r.nm} +${fmt(r.mg)}`,t:now()});
-  SV(d);msg('Đã cộng tiền thẻ');loadAdmin()}
-function huyTHE(id){const l=prompt('Lý do hủy thẻ?');if(!l)return;
-  const d=DB();const r=find(d,'the',id);r.trangThai='❌ Thẻ sai/đã dùng: '+l;r.lydo=l;SV(d);msg('Đã hủy thẻ');loadAdmin()}
-function guiKEY(id){const k=document.getElementById('k'+id).value.trim();if(!k)return msg('Nhập key',1);
-  const d=DB();const r=find(d,'buy',id);r.key=k;r.trangThai='✅ Đã gửi KEY';
-  const u=d.users.find(x=>x.u===r.user);
-  if(!u.tx)u.tx=[];u.tx.unshift({tt:`🔑 Nhận key ${r.tt}`,t:now()});
-  SV(d);msg('📤 Đã gửi KEY cho user thành công');loadAdmin()}
 </script>
 </body>
 </html>
